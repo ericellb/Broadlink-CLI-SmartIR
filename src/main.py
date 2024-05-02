@@ -92,6 +92,7 @@ def main():
 
     # Save the output file
     saveConfig(outputConfig, deviceType)
+    print('Finished - Config saved to ./out/ folder\n')
 
 
 main()

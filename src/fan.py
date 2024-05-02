@@ -5,12 +5,19 @@ import broadlink
 import logging
 from helpers import async_learn
 from typing import Union
+import questionary
 
 
 class FanOperationModes(Enum):
     OFF = 'off'
+    DEFAULT = 'default'
     FORWARD = 'forward'
     REVERSE = 'reverse'
+
+
+class FanOperationHelper(Enum):
+    ONE_DIRECTION = 'one_direction'
+    FORWARD_REVERSE = 'forward_reverse'
 
 
 class FanSpeedModes(Enum):
@@ -29,21 +36,31 @@ class FanSpeedModes(Enum):
 class FanDevice:
     def __init__(self, device: Union[broadlink.rm4pro, broadlink.rm4mini], config: dict, logger: logging.Logger):
         self.device = device
-        self.fanModes = config['fan']['fanModes']
-        self.operationModes = config['fan']['operationModes']
+        self.operationModes = self._promptOperationModes()
+        self.fanModes = self._promptFanModes()
         self.logger = logger
-
-        # Validate that the fanOperationModes are part of the enum
-        for operationMode in self.operationModes:
-            if operationMode not in [mode.value for mode in FanOperationModes]:
-                raise ValueError(f'Invalid Operation Mode: {operationMode}')
-
-        # Validate that the fanSpeedmodes are part of the enum
-        for fanMode in self.fanModes:
-            if fanMode not in [mode.value for mode in FanSpeedModes]:
-                raise ValueError(f'Invalid Speed Mode: {fanMode}')
-
         self.outputConfig = self._buildBaseOutputConfig(config)
+
+    def _promptOperationModes(self):
+        operationModes = [operationMode.value for operationMode in FanOperationHelper]
+
+        selectedOperationModes = questionary.select(
+            'Select Operation Modes (Most fans are one direction)',
+            choices=operationModes
+        ).ask()
+
+        if selectedOperationModes == FanOperationHelper.ONE_DIRECTION.value:
+            return [FanOperationModes.DEFAULT.value]
+        else:
+            return [FanOperationModes.FORWARD.value, FanOperationModes.REVERSE.value]
+
+    def _promptFanModes(self):
+        selectedFanModes = questionary.checkbox(
+            'Select Fan Modes (Number of speeds supported)',
+            choices=[fanMode.value for fanMode in FanSpeedModes]
+        ).ask()
+
+        return selectedFanModes
 
     def _buildBaseOutputConfig(self, config: dict):
         # Build the base output config
@@ -55,10 +72,6 @@ class FanDevice:
         outputConfig['speed'] = self.fanModes
         outputConfig['commands'] = {}
 
-        # Forward / Reverse can be set, if not we need to set it to default
-        if self.operationModes == []:
-            self.operationModes = ['default']
-
         # Build the base config for each operation mode
         for operationMode in self.operationModes:
             outputConfig['commands'][operationMode] = {}
@@ -69,9 +82,12 @@ class FanDevice:
 
     def _learnCommand(self, operationMode: str, fanMode: str):
         if (operationMode and fanMode):
-            print(f'Learning {operationMode.upper()} {fanMode.upper()} - Point the remote to the device and press the button')
+            if operationMode == FanOperationModes.DEFAULT.value:
+                print(f'Learning Speed {fanMode.upper()}')
+            else:
+                print(f'Learning {operationMode.upper()} Speed {fanMode.upper()}')
         elif (operationMode):
-            print(f'Learning {operationMode.upper()} - Point the remote to the device and press the button')
+            print(f'Learning {operationMode.upper()}')
 
         command = async_learn(self.device)
 
@@ -89,6 +105,8 @@ class FanDevice:
             self.outputConfig['commands'][operationMode] = command
 
     def learn(self):
+        print('\nYou will now be prompted to press the corresponding button on the remote for each command\n')
+
         # Learn the OFF Command
         self._learnCommand(FanOperationModes.OFF.name.lower(), None)
         self.logger.debug(json.dumps(self.outputConfig, indent=4))

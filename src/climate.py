@@ -3,7 +3,7 @@ from enum import Enum
 import json
 import broadlink
 import logging
-from helpers import async_learn, validateTemp
+from helpers import async_learn, validateNumber
 from typing import Union
 import questionary
 
