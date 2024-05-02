@@ -73,7 +73,12 @@ def promptSupportedModels():
 
 
 def saveConfig(config: dict, deviceType: str):
-    fileName = f'./out/config_{deviceType}-{time.time()}.json'
+    # Create the out folder if it doesn't exist
+    if not os.path.exists('./out'):
+        os.makedirs('./out')
+
+    manufacturer = config['manufacturer']
+    fileName = f'./out/{deviceType}-{manufacturer}-{time.time()}.json'
     with open(fileName, 'w') as f:
         json.dump(config, f, indent=4)
 
@@ -102,7 +107,7 @@ def main():
 
     # Save the output file
     saveConfig(outputConfig, deviceType)
-    print('Finished - Config saved to ./out/ folder\n')
+    print('Finished - Config saved to ./out directory\n')
 
 
 main()
