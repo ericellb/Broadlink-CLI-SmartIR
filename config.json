@@ -29,5 +29,13 @@
       "level2",
       "level3"
     ]
+  },
+  "media": {
+    "sources": [
+      "HDMI1",
+      "HDMI2",
+      "HDMI3",
+      "TV"
+    ]
   }
 }

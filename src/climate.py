@@ -91,7 +91,7 @@ class ClimateDevice:
         if choice.lower() == 'y' or choice == '':
             return self._writeCommandToConfig(command, operationMode, fanMode, temp)
         else:
-            return self._learnCommand()
+            return self._learnCommand(operationMode, fanMode, temp)
 
     def _writeCommandToConfig(self, command: str, operationMode: str, fanMode: str, temp: int):
         if operationMode and fanMode and temp:

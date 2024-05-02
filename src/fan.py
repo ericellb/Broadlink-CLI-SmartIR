@@ -80,7 +80,7 @@ class FanDevice:
         if choice.lower() == 'y' or choice == '':
             return self._writeCommandToConfig(command, operationMode, fanMode)
         else:
-            return self._learnCommand()
+            return self._learnCommand(operationMode, fanMode)
 
     def _writeCommandToConfig(self, command: str, operationMode: str, fanMode: str):
         if operationMode and fanMode:

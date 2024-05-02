@@ -2,11 +2,12 @@ import broadlink
 import json
 import time
 import logging
+from tabulate import tabulate
 from typing import List
 from climate import ClimateDevice
 from fan import FanDevice
+from media import MediaDevice
 from device import DeviceType
-from tabulate import tabulate
 import os
 
 
@@ -93,6 +94,10 @@ def main():
     if deviceType == DeviceType.FAN.name:
         fan = FanDevice(device, config, logger)
         outputConfig = fan.learn()
+
+    if deviceType == DeviceType.MEDIA.name:
+        media = MediaDevice(device, config, logger)
+        outputConfig = media.learn()
 
     # Save the output file
     saveConfig(outputConfig, deviceType)
