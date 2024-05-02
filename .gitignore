@@ -1,0 +1,4 @@
+.vscode
+out
+broadlink-cli-venv
+__pycache__
