@@ -30,3 +30,10 @@ def async_learn(device: broadlink.Device):
     data = ''.join(format(x, '02x') for x in bytearray(data))
     decode_hex = codecs.getdecoder("hex_codec")
     return base64.b64encode(decode_hex(data)[0]).decode('utf-8')
+
+
+def validateNumber(value):
+    if value.isdigit():
+        return True
+    else:
+        return "Please enter a valid number."

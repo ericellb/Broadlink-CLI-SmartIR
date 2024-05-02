@@ -3,7 +3,7 @@ from enum import Enum
 import json
 import broadlink
 import logging
-from device import async_learn
+from helpers import async_learn
 from typing import Union
 
 

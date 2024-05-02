@@ -7,21 +7,6 @@
       "MODEL_3"
     ]
   },
-  "climate": {
-    "minTemperature": 18,
-    "maxTemperature": 30,
-    "precision": 1.0,
-    "operationModes": [
-      "cool"
-    ],
-    "fanModes": [
-      "auto",
-      "level1",
-      "level2",
-      "level3",
-      "level4"
-    ]
-  },
   "fan": {
     "operationModes": [],
     "fanModes": [

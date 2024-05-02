@@ -3,8 +3,9 @@ from enum import Enum
 import json
 import broadlink
 import logging
-from device import async_learn
+from helpers import async_learn, validateTemp
 from typing import Union
+import questionary
 
 
 class ClimateOperationModes(Enum):
@@ -33,24 +34,40 @@ class ClimateFanModes(Enum):
 class ClimateDevice:
     def __init__(self, device: Union[broadlink.rm4pro, broadlink.rm4mini], config: dict, logger: logging.Logger):
         self.device = device
-        self.tempMin = config['climate']['minTemperature']
-        self.tempMax = config['climate']['maxTemperature']
-        self.fanModes = config['climate']['fanModes']
-        self.operationModes = config['climate']['operationModes']
-        self.precision = config['climate']['precision']
+        self.tempMin = self._promptTemperature('Minimum')
+        self.tempMax = self._promptTemperature('Maximum')
+        self.precision = self._promptPrecision()
+        self.operationModes = self._promptOperationModes()
+        self.fanModes = self._promptFanModes()
         self.logger = logger
-
-        # Validate that the fanModes are part of the enum
-        for fanMode in self.fanModes:
-            if fanMode not in [mode.value for mode in ClimateFanModes]:
-                raise ValueError(f'Invalid Fan Mode: {fanMode}')
-
-        # Validate that the operationModes are part of the enum
-        for operationMode in self.operationModes:
-            if operationMode not in [mode.value for mode in ClimateOperationModes]:
-                raise ValueError(f'Invalid Operation Mode: {operationMode}')
-
         self.outputConfig = self._buildBaseOutputConfig(config)
+
+    def _promptTemperature(self, minOrMax: str):
+        temperature = questionary.text(f'Enter the {minOrMax} Temperature', validate=validateNumber).ask()
+        return int(temperature)
+
+    def _promptPrecision(self):
+        precision = questionary.select('Select Precision (Default is 1.0)', choices=['1.0', '0.5']).ask()
+        return float(precision)
+
+    def _promptOperationModes(self):
+        # Remove OFF from the list of operation modes, its required below
+        operationModes = [operationMode.value for operationMode in ClimateOperationModes if operationMode != ClimateOperationModes.OFF]
+
+        selectedOperationModes = questionary.checkbox(
+            'Select Operation Modes',
+            choices=operationModes
+        ).ask()
+
+        return selectedOperationModes
+
+    def _promptFanModes(self):
+        selectedFanModes = questionary.checkbox(
+            'Select Fan Modes (Number of speeds supported)',
+            choices=[fanMode.value for fanMode in ClimateFanModes]
+        ).ask()
+
+        return selectedFanModes
 
     def _buildBaseOutputConfig(self, config: dict):
         # Build the base output config
@@ -78,15 +95,15 @@ class ClimateDevice:
 
     def _learnCommand(self, operationMode: str, fanMode: str, temp: int):
         if (operationMode and fanMode and temp):
-            print(f'Learning {operationMode.upper()} {fanMode.upper()} {str(temp).upper()}° - Point the remote to the device and press the button')
+            print(f'Learning {operationMode.upper()} {fanMode.upper()} {str(temp).upper()}°')
         elif (operationMode and fanMode):
-            print(f'Learning {operationMode.upper()} {fanMode.upper()} - Point the remote to the device and press the button')
+            print(f'Learning {operationMode.upper()} {fanMode.upper()}')
         elif (operationMode):
-            print(f'Learning {operationMode.upper()} - Point the remote to the device and press the button')
+            print(f'Learning {operationMode.upper()}')
 
         command = async_learn(self.device)
 
-        choice = input(f'Press Enter or Y to confirm or N to re-learn Command - {command}\n')
+        choice = input(f'Press Enter or Y to confirm or N to Relearn - {command}\n')
 
         if choice.lower() == 'y' or choice == '':
             return self._writeCommandToConfig(command, operationMode, fanMode, temp)
@@ -102,6 +119,8 @@ class ClimateDevice:
             self.outputConfig['commands'][operationMode] = command
 
     def learn(self):
+        print('\nYou will now be prompted to press the corresponding button on the remote for each command\n')
+
         # Learn the OFF Command
         self._learnCommand(ClimateOperationModes.OFF.name.lower(), None, None)
         self.logger.debug(json.dumps(self.outputConfig, indent=4))
