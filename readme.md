@@ -2,6 +2,8 @@
 
 The goal of this tool was to provide an easy way to learn ALL codes for a suitable device to use with [SmartIR](https://github.com/smartHomeHub/SmartIR) and [Home Assistant](https://www.home-assistant.io/). Check out the demo, you'll see how easy it is.
 
+https://github.com/ericellb/Broadlink-CLI-SmartIR/assets/6540524/9cc76cf1-067a-4d1a-b1a2-269df2b7ded0
+
 ## Motivation
 
 This tool is a replacement for [BroadlinkIRTools](https://github.com/keitetran/BroadlinkIRTools) or [broadlinkmanager-docker](https://github.com/t0mer/broadlinkmanager-docker) 
