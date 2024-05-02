@@ -4,7 +4,7 @@ import json
 import broadlink
 import logging
 from helpers import async_learn, validateNumber
-from typing import Union
+from typing import List, Union
 import questionary
 
 
@@ -32,7 +32,7 @@ class ClimateFanModes(Enum):
 
 
 class ClimateDevice:
-    def __init__(self, device: Union[broadlink.rm4pro, broadlink.rm4mini], config: dict, logger: logging.Logger):
+    def __init__(self, device: Union[broadlink.rm4pro, broadlink.rm4mini], manufacturer: str, supportedModels: List[str], logger: logging.Logger):
         self.device = device
         self.tempMin = self._promptTemperature('Minimum')
         self.tempMax = self._promptTemperature('Maximum')
@@ -40,7 +40,7 @@ class ClimateDevice:
         self.operationModes = self._promptOperationModes()
         self.fanModes = self._promptFanModes()
         self.logger = logger
-        self.outputConfig = self._buildBaseOutputConfig(config)
+        self.outputConfig = self._buildBaseOutputConfig(manufacturer, supportedModels)
 
     def _promptTemperature(self, minOrMax: str):
         temperature = questionary.text(f'Enter the {minOrMax} Temperature', validate=validateNumber).ask()
@@ -69,11 +69,11 @@ class ClimateDevice:
 
         return selectedFanModes
 
-    def _buildBaseOutputConfig(self, config: dict):
+    def _buildBaseOutputConfig(self, manufacturer: str, supportedModels: List[str],):
         # Build the base output config
         outputConfig = {}
-        outputConfig['manufacturer'] = config['manufacturer']
-        outputConfig['supportedModels'] = config['supportedModels']
+        outputConfig['manufacturer'] = manufacturer
+        outputConfig['supportedModels'] = supportedModels
         outputConfig['supportedController'] = 'Broadlink'
         outputConfig['commandsEncoding'] = 'Base64'
         outputConfig['minTemperature'] = self.tempMin

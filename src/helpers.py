@@ -10,7 +10,6 @@ class DeviceType(Enum):
     CLIMATE = 1
     MEDIA = 2
     FAN = 3
-    OTHER = 4
 
 
 def async_learn(device: broadlink.Device):

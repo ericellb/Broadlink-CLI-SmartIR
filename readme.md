@@ -12,7 +12,7 @@ pip3 install -r requirements.txt
 
 ## Setup
 
-The `config.json` file is the main entry path to learning IR codes. A default configuration is included, and you should modify the component that you are interested in using. (`CLIMATE`, `FAN`, `MEDIA`, `OTHER`)
+The `config.json` file is the main entry path to learning IR codes. A default configuration is included, and you should modify the component that you are interested in using. (`CLIMATE`, `FAN`, `MEDIA`)
 
 ### Climate Setup
 
@@ -45,3 +45,11 @@ Run the script and follow the instructions to setup the device. You will be prom
 ```
 python src/main.py
 ```
+
+## Inspiration
+
+Inspiration to make this came from the following
+- https://github.com/mjg59/python-broadlink
+- https://github.com/smartHomeHub/SmartIR
+- https://github.com/keitetran/BroadlinkIRTools
+- https://github.com/t0mer/broadlinkmanager-docker

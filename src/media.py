@@ -4,7 +4,8 @@ import json
 import broadlink
 import logging
 from helpers import async_learn
-from typing import Union
+from typing import List, Union
+import questionary
 
 
 class MediaCommands(Enum):
@@ -18,17 +19,26 @@ class MediaCommands(Enum):
 
 
 class MediaDevice:
-    def __init__(self, device: Union[broadlink.rm4pro, broadlink.rm4mini], config: dict, logger: logging.Logger):
+    def __init__(self, device: Union[broadlink.rm4pro, broadlink.rm4mini], manufacturer: str, supportedModels: List[str], logger: logging.Logger):
         self.device = device
-        self.sources = config['media']['sources']
+        self.sources = self._promptMediaSources()
         self.logger = logger
-        self.outputConfig = self._buildBaseOutputConfig(config)
+        self.outputConfig = self._buildBaseOutputConfig(manufacturer, supportedModels)
 
-    def _buildBaseOutputConfig(self, config: dict):
+    def _promptMediaSources(self):
+        mediaSources = questionary.text('Enter Media Source names (comma separated)').ask()
+        if ',' in mediaSources:
+            mediaSources = mediaSources.split(',')
+        else:
+            mediaSources = [mediaSources]
+
+        return mediaSources
+
+    def _buildBaseOutputConfig(self, manufacturer: str, supportedModels: List[str],):
         # Build the base output config
         outputConfig = {}
-        outputConfig['manufacturer'] = config['manufacturer']
-        outputConfig['supportedModels'] = config['supportedModels']
+        outputConfig['manufacturer'] = manufacturer
+        outputConfig['supportedModels'] = supportedModels
         outputConfig['supportedController'] = 'Broadlink'
         outputConfig['commandsEncoding'] = 'Base64'
         outputConfig['commands'] = {}

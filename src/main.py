@@ -2,7 +2,6 @@ import broadlink
 import json
 import time
 import logging
-from tabulate import tabulate
 from typing import List
 from climate import ClimateDevice
 from fan import FanDevice
