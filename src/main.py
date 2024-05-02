@@ -4,6 +4,7 @@ import time
 import logging
 from typing import List
 from climate import ClimateDevice
+from fan import FanDevice
 from device import DeviceType
 from tabulate import tabulate
 import os
@@ -88,6 +89,10 @@ def main():
     if deviceType == DeviceType.CLIMATE.name:
         climate = ClimateDevice(device, config, logger)
         outputConfig = climate.learn()
+
+    if deviceType == DeviceType.FAN.name:
+        fan = FanDevice(device, config, logger)
+        outputConfig = fan.learn()
 
     # Save the output file
     saveConfig(outputConfig, deviceType)

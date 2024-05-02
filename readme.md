@@ -12,16 +12,21 @@ pip3 install -r requirements.txt
 
 ## Usage
 
-The `config.json` file is the main entry path to learning IR codes. Here you should setup the basic information that will be used to create the final SmartIR compatible JSON file.
+The `config.json` file is the main entry path to learning IR codes. A default configuration is included, and you should modify the component that you are interested in using. (`CLIMATE`, `FAN`, `MEDIA`, `OTHER`)
 
-- Modify the `Manufactuer` to the what your device brand is
+### Climate Setup
+
+- Modify the `Manufacturer` to the what your device brand is
 - Modify the `Supported Models` to your model, and all other models that work
 - Modify the `climate` section
-  - Set the minimum and maximum temperatures of your device
-  - Fill out your devices supported Operations Modes (`cool`, `heat`, `heat_cool`, `fan_only`, `dry`)
-  - Fill out your devices supported Fan Modes (These can be named whatever you want. However standard is `auto`, `level1`, `level2`, `level3`, `level5`, `silent`. P.S more can be added)
+  - Set the `minTemperature` and `maxTemperature` of your device
+  - Set the `Operations Modes` of what your device supports (`cool`, `heat`, `heat_cool`, `fan_only`, `dry`)
+  - Set the Fan Modes that your device supports. (Standard naming is `auto`, `level1`, `level2`, `level3`, `level5`, `silent`) (P.S. You can add up to `level10`)
 
-Now you are ready to run the script and follow the instructions!
-```
-python src/main.py
-```
+### Fan Setup
+
+- Modify the `Manufacturer` to the what your device brand is
+- Modify the `Supported Models` to your model, and all other models that work
+- Modify the `fan` section
+  - Set the `Operations Modes` of what your device supports. Leave this blank unless your fan supports forward + reverse, if so fill it with [`forward`, `reverse`]
+  - Set the `Fan Modes` that your device supports. (Standard naming is `auto`, `level1`, `level2`, `level3`, `level5`, `silent`) (P.S. You can add up to `level10`)

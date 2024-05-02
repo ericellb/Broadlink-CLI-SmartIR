@@ -5,14 +5,12 @@
       "MODEL_1",
       "MODEL_2",
       "MODEL_3"
-    ],
-    "precision": 1.0
+    ]
   },
   "climate": {
-    "temp": {
-      "min": 18,
-      "max": 19
-    },
+    "minTemperature": 18,
+    "maxTemperature": 30,
+    "precision": 1.0,
     "operationModes": [
       "cool"
     ],
@@ -22,6 +20,14 @@
       "level2",
       "level3",
       "level4"
+    ]
+  },
+  "fan": {
+    "operationModes": [],
+    "fanModes": [
+      "level1",
+      "level2",
+      "level3"
     ]
   }
 }
