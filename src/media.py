@@ -27,8 +27,8 @@ class MediaDevice:
     def _buildBaseOutputConfig(self, config: dict):
         # Build the base output config
         outputConfig = {}
-        outputConfig['manufacturer'] = config['device']['manufacturer']
-        outputConfig['supportedModels'] = config['device']['supportedModels']
+        outputConfig['manufacturer'] = config['manufacturer']
+        outputConfig['supportedModels'] = config['supportedModels']
         outputConfig['supportedController'] = 'Broadlink'
         outputConfig['commandsEncoding'] = 'Base64'
         outputConfig['commands'] = {}

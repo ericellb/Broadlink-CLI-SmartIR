@@ -12,12 +12,6 @@ import questionary
 import os
 
 
-def loadConfig():
-    with open('config.json') as f:
-        config = json.load(f)
-    return config
-
-
 def getLogger():
     configLogLevel = os.environ.get('LOG_LEVEL', 'INFO').upper()
     logging.basicConfig(level=logging._nameToLevel[configLogLevel])
@@ -64,6 +58,21 @@ def selectDeviceType() -> DeviceType:
     return selectedDeviceType
 
 
+def promptManufacturer():
+    manufacturer = questionary.text('Enter Manufacturer').ask()
+    return manufacturer
+
+
+def promptSupportedModels():
+    supportedModels = questionary.text('Enter Supported Models Number / Names (comma separated)').ask()
+    if ',' in supportedModels:
+        supportedModels = supportedModels.split(',')
+    else:
+        supportedModels = [supportedModels]
+
+    return supportedModels
+
+
 def saveConfig(config: dict, deviceType: str):
     fileName = f'./out/config_{deviceType}-{time.time()}.json'
     with open(fileName, 'w') as f:
@@ -71,23 +80,25 @@ def saveConfig(config: dict, deviceType: str):
 
 
 def main():
-    config = loadConfig()
     logger = getLogger()
     devices = scanDevices()
     device = showAndSelectDevice(devices)
     deviceType = selectDeviceType()
 
+    manufacturer = promptManufacturer()
+    supportedModels = promptSupportedModels()
+
     # Call the appropriate device class to learn
     if deviceType == DeviceType.CLIMATE.name:
-        climate = ClimateDevice(device, config, logger)
+        climate = ClimateDevice(device, manufacturer, supportedModels, logger)
         outputConfig = climate.learn()
 
     if deviceType == DeviceType.FAN.name:
-        fan = FanDevice(device, config, logger)
+        fan = FanDevice(device, manufacturer, supportedModels, logger)
         outputConfig = fan.learn()
 
     if deviceType == DeviceType.MEDIA.name:
-        media = MediaDevice(device, config, logger)
+        media = MediaDevice(device, manufacturer, supportedModels, logger)
         outputConfig = media.learn()
 
     # Save the output file

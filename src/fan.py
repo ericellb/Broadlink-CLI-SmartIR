@@ -4,7 +4,7 @@ import json
 import broadlink
 import logging
 from helpers import async_learn
-from typing import Union
+from typing import List, Union
 import questionary
 
 
@@ -34,12 +34,12 @@ class FanSpeedModes(Enum):
 
 
 class FanDevice:
-    def __init__(self, device: Union[broadlink.rm4pro, broadlink.rm4mini], config: dict, logger: logging.Logger):
+    def __init__(self, device: Union[broadlink.rm4pro, broadlink.rm4mini], manufacturer: str, supportedModels: List[str], logger: logging.Logger):
         self.device = device
         self.operationModes = self._promptOperationModes()
         self.fanModes = self._promptFanModes()
         self.logger = logger
-        self.outputConfig = self._buildBaseOutputConfig(config)
+        self.outputConfig = self._buildBaseOutputConfig(manufacturer, supportedModels)
 
     def _promptOperationModes(self):
         operationModes = [operationMode.value for operationMode in FanOperationHelper]
@@ -62,11 +62,11 @@ class FanDevice:
 
         return selectedFanModes
 
-    def _buildBaseOutputConfig(self, config: dict):
+    def _buildBaseOutputConfig(self, manufacturer: str, supportedModels: List[str]):
         # Build the base output config
         outputConfig = {}
-        outputConfig['manufacturer'] = config['device']['manufacturer']
-        outputConfig['supportedModels'] = config['device']['supportedModels']
+        outputConfig['manufacturer'] = manufacturer
+        outputConfig['supportedModels'] = supportedModels
         outputConfig['supportedController'] = 'Broadlink'
         outputConfig['commandsEncoding'] = 'Base64'
         outputConfig['speed'] = self.fanModes
