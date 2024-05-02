@@ -40,6 +40,11 @@ class ClimateDevice:
         self.operationModes = self._promptOperationModes()
         self.fanModes = self._promptFanModes()
         self.logger = logger
+
+        # Grab our temps with precision, and trim the ending .0's
+        tempWithPrecision = [self.tempMin + self.precision * i for i in range(int((self.tempMax - self.tempMin) / self.precision) + 1)]
+        self.temps = [int(x) if x.is_integer() else x for x in tempWithPrecision]
+
         self.outputConfig = self._buildBaseOutputConfig(manufacturer, supportedModels)
 
     def _promptTemperature(self, minOrMax: str):
@@ -88,7 +93,7 @@ class ClimateDevice:
             outputConfig['commands'][operationMode] = {}
             for fanMode in self.fanModes:
                 outputConfig['commands'][operationMode][fanMode] = {}
-                for temp in range(self.tempMin, self.tempMax + 1):
+                for temp in self.temps:
                     outputConfig['commands'][operationMode][fanMode][str(temp)] = ''
 
         return outputConfig
@@ -128,7 +133,7 @@ class ClimateDevice:
         # Learn each temperature at each fanMode and operationMode
         for operationMode in self.operationModes:
             for fanMode in self.fanModes:
-                for temp in range(self.tempMin, self.tempMax + 1):
+                for temp in self.temps:
                     self._learnCommand(operationMode, fanMode, temp)
                     self.logger.debug(json.dumps(self.outputConfig, indent=4))
 
