@@ -14,7 +14,8 @@ class ClimateOperationModes(Enum):
     HEAT = 'heat'
     HEAT_COOL = 'heat_cool'
     FAN = 'fan_only'
-    DRY = 'dry'
+    DRY_VARIABLE = 'dry_multiple_speeds'
+    DRY_SINGLE_SPEED = 'dry_single_speed'
 
 
 class ClimateFanModes(Enum):
@@ -98,6 +99,26 @@ class ClimateDevice:
 
         return outputConfig
 
+    def _writeCommandToConfig(self, command: str, operationMode: str, fanMode: str, temp: int):
+        # SmartIR only cares about `dry` speed, the single / variable was just to prevent learning extra commands
+        if operationMode == ClimateOperationModes.DRY_SINGLE_SPEED or operationMode == ClimateOperationModes.DRY_VARIABLE:
+            operationMode = 'dry'
+
+        # Ensure the outputConfig has the necessary keys
+        if 'commands' not in self.outputConfig:
+            self.outputConfig['commands'] = {}
+        if operationMode not in self.outputConfig['commands']:
+            self.outputConfig['commands'][operationMode] = {}
+        if fanMode not in self.outputConfig['commands'][operationMode]:
+            self.outputConfig['commands'][operationMode][fanMode] = {}
+
+        if operationMode and fanMode and temp:
+            self.outputConfig['commands'][operationMode][fanMode][str(temp)] = command
+        elif operationMode and fanMode:
+            self.outputConfig['commands'][operationMode][fanMode] = command
+        elif operationMode:
+            self.outputConfig['commands'][operationMode] = command
+
     def _learnCommand(self, operationMode: str, fanMode: str, temp: int):
         if (operationMode and fanMode and temp):
             print(f'Learning {operationMode.upper()} {fanMode.upper()} {str(temp).upper()}°')
@@ -115,14 +136,6 @@ class ClimateDevice:
         else:
             return self._learnCommand(operationMode, fanMode, temp)
 
-    def _writeCommandToConfig(self, command: str, operationMode: str, fanMode: str, temp: int):
-        if operationMode and fanMode and temp:
-            self.outputConfig['commands'][operationMode][fanMode][str(temp)] = command
-        elif operationMode and fanMode:
-            self.outputConfig['commands'][operationMode][fanMode] = command
-        elif operationMode:
-            self.outputConfig['commands'][operationMode] = command
-
     def learn(self):
         print('\nYou will now be prompted to press the corresponding button on the remote for each command\n')
 
@@ -132,7 +145,12 @@ class ClimateDevice:
 
         # Learn each temperature at each fanMode and operationMode
         for operationMode in self.operationModes:
-            for fanMode in self.fanModes:
+            # If DRY only supports a single fan speed, we can assume its a "fixed" speed
+            tempFanModes = self.fanModes
+            if operationMode == ClimateOperationModes.DRY_SINGLE_SPEED.name.lower():
+                tempFanModes = [ClimateFanModes.AUTO.value]
+
+            for fanMode in tempFanModes:
                 for temp in self.temps:
                     self._learnCommand(operationMode, fanMode, temp)
                     self.logger.debug(json.dumps(self.outputConfig, indent=4))
